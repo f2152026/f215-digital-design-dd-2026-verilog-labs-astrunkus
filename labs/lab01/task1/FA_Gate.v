@@ -7,6 +7,16 @@
 //           instantiations below into any different sequence, then
 //           re-simulate with the same tb.v and compare.
 
+module half_adder_v3(
+  input  a,
+  input  b,
+  output sum,
+  output carry
+);
+  assign sum = a ^ b;
+  assign carry = a & b;
+endmodule
+
 module FA_Gate(
   input  a,
   input  b,
@@ -14,12 +24,10 @@ module FA_Gate(
   output sum,
   output cout
 );
-  wire ps, pc1, pc2;
+  wire first_sum, first_carry, second_carry;
 
-  xor (ps,  a,   b);
-  and (pc1, a,   b);
-  xor (sum, cin, ps);
-  and (pc2, cin, ps);
-  or  (cout, pc1, pc2);
+  half_adder_v3 first (.a(a), .b(b), .sum(first_sum), .carry(first_carry));
+  half_adder_v3 second (.a(first_sum), .b(cin), .sum(sum), .carry(second_carry));
+  assign cout = first_carry | second_carry;
 
 endmodule
