@@ -17,6 +17,16 @@
 // gates are rarely symmetric this way. Re-simulate with the SAME
 // ripple_adder.v and tb.v; nothing else needs to change.
 
+module half_adder_v3(
+  input  a,
+  input  b,
+  output sum,
+  output carry
+);
+  xor #(2) make_sum(sum, a, b);
+  and #(2) make_carry(carry, a, b);
+endmodule
+
 module FA_Gate(
   input  a,
   input  b,
@@ -24,12 +34,10 @@ module FA_Gate(
   output sum,
   output cout
 );
-  wire ps, pc1, pc2;
+  wire ab_sum, ab_carry, cin_carry;
 
-  xor (ps,  a,   b);
-  and (pc1, a,   b);
-  xor (sum, cin, ps);
-  and (pc2, cin, ps);
-  or  (cout, pc1, pc2);
+  half_adder_v3 lower (.a(a), .b(b), .sum(ab_sum), .carry(ab_carry));
+  half_adder_v3 upper (.a(ab_sum), .b(cin), .sum(sum), .carry(cin_carry));
+  or #(2) combine_carry(cout, ab_carry, cin_carry);
 
 endmodule
